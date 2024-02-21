@@ -1,0 +1,7 @@
+# Function dependencies, for example:
+# package>=version
+
+line-bot-sdk
+requests
+openai==0.28
+git+https://github.com/ozgur/python-firebase

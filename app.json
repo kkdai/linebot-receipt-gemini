@@ -1,0 +1,36 @@
+{
+  "name": "linebot receipt helper",
+  "description": "Quick LINEBot with Langchain",
+  "repository": "https://github.com/kkdai/linebot-receipt-gemini",
+  "keywords": [
+    "python",
+    "linebot",
+    "gemini"
+  ],
+  "buildpacks": [
+    {
+      "url": "https://github.com/heroku/heroku-buildpack-python.git"
+    },
+    {
+      "url": "heroku/python"
+    }
+  ],
+  "env": {
+    "OPENAI_API_KEY": {
+      "description": "OpenAI Access Token",
+      "required": true
+    },
+    "ChannelAccessToken": {
+      "description": "Channel Access Token",
+      "required": true
+    },
+    "ChannelSecret": {
+      "description": "Channel Secret",
+      "required": true
+    },
+    "FIREBASE_URL": {
+      "description": "FIREBASE URL",
+      "required": true
+    }
+  }
+}
