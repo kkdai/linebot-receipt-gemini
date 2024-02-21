@@ -6,3 +6,4 @@ openai==0.28.1
 yfinance
 pydantic
 tiktoken
+git+https://github.com/ozgur/python-firebase
