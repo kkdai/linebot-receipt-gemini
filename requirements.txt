@@ -1,7 +1,8 @@
-# Function dependencies, for example:
-# package>=version
-
-line-bot-sdk
-requests
-openai==0.28
-git+https://github.com/ozgur/python-firebase
+line-bot-sdk==3.5.0
+fastapi
+uvicorn[standard]
+langchain==0.0.308
+openai==0.28.1
+yfinance
+pydantic
+tiktoken
