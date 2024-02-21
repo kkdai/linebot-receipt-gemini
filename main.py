@@ -34,8 +34,6 @@ from firebase import firebase
 channel_secret = os.getenv('ChannelSecret', None)
 channel_access_token = os.getenv('ChannelAccessToken', None)
 openai.api_key = os.getenv('OPENAI_API_KEY')
-token = os.getenv('LINE_BOT_TOKEN')
-secret = os.getenv('LINE_BOT_SECRET')
 firebase_url = os.getenv('FIREBASE_URL')
 
 if channel_secret is None:
@@ -87,14 +85,15 @@ async def handle_callback(request: Request):
 
         msg = event.message.text
         if msg == '!清空':
-            reply_msg = "對話歷史紀錄已經清空！"
+            reply_msg = TextSendMessage(text='對話歷史紀錄已經清空！')
             fdb.delete(user_chat_path, None)
         elif msg == '!qq':
             # 使用範例
             items_and_total_on_date = find_items_and_total_on_date(
                 fdb, '12/25')
             print(f"Items and total on 12/25: {items_and_total_on_date}")
-            reply_msg = f"Items and total on 12/25: {items_and_total_on_date}"
+            reply_msg = TextSendMessage(
+                text=f"Items and total on 12/25: {items_and_total_on_date}")
         else:
             messages.append({"role": "user", "content": msg})
             response = openai.ChatCompletion.create(
@@ -109,7 +108,7 @@ async def handle_callback(request: Request):
 
         await line_bot_api.reply_message(
             event.reply_token,
-            TextSendMessage(text=reply_msg)
+            reply_msg
         )
 
     return 'OK'
