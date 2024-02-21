@@ -83,6 +83,9 @@ async def handle_callback(request: Request):
         else:
             messages = chatgpt
 
+        # Provide a default value for reply_msg
+        reply_msg = TextSendMessage(text='No message to reply with')
+
         msg = event.message.text
         if msg == '!清空':
             reply_msg = TextSendMessage(text='對話歷史紀錄已經清空！')
