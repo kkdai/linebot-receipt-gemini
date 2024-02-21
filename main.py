@@ -107,6 +107,7 @@ async def handle_callback(request: Request):
             )
             ai_msg = response.choices[0].message.content.replace('\n', '')
             messages.append({"role": "assistant", "content": ai_msg})
+            reply_msg = TextSendMessage(text=ai_msg)
             fdb.put_async(user_chat_path, None, messages)
 
         await line_bot_api.reply_message(
