@@ -87,15 +87,14 @@ async def handle_callback(request: Request):
 
         msg = event.message.text
         if msg == '!清空':
-            reply_msg = TextSendMessage(text='對話歷史紀錄已經清空！')
+            reply_msg = "對話歷史紀錄已經清空！"
             fdb.delete(user_chat_path, None)
         elif msg == '!qq':
             # 使用範例
             items_and_total_on_date = find_items_and_total_on_date(
                 fdb, '12/25')
             print(f"Items and total on 12/25: {items_and_total_on_date}")
-            reply_msg = TextSendMessage(
-                text=f"Items and total on 12/25: {items_and_total_on_date}")
+            reply_msg = f"Items and total on 12/25: {items_and_total_on_date}"
         else:
             messages.append({"role": "user", "content": msg})
             response = openai.ChatCompletion.create(
