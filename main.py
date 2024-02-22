@@ -140,14 +140,11 @@ async def handle_callback(request: Request):
                 img, imgage_prompt)
 
             # Convert the JSON string to a Python object using parse_receipt_json
-            receipt_json_data = parse_receipt_json(result.text)
+            receipt_json_obj = parse_receipt_json(result.text)
             print(f"Receipt data: >{receipt_json_data}<")
 
             # Check if receipt_data is not None
-            if receipt_json_data:
-                # Parse the JSON data into a Python dictionary
-                receipt_json_obj = json.loads(receipt_json_data)
-
+            if receipt_json_obj:
                 # Extract the necessary information from receipt_data
                 print(f"----Extract Receipt data----")
                 receipt_obj = receipt_json_obj.get('Receipt')
