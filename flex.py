@@ -1,0 +1,104 @@
+from linebot.models import FlexSendMessage
+
+
+# Get receipt flex message data from the receipt data and items
+def get_receipt_flex_msg(receipt_data, items):
+    # Using Templat
+    items_contents = []
+    for item in items:
+        items_contents.append(
+            {
+                "type": "box",
+                "layout": "horizontal",
+                "contents": [
+                    {
+                        "type": "text",
+                        "text": item.get("name"),
+                        "size": "sm",
+                        "color": "#555555",
+                        "flex": 0
+                    },
+                    {
+                        "type": "text",
+                        "text": f"${item.get('price')}",
+                        "size": "sm",
+                        "color": "#111111",
+                        "align": "end"
+                    }
+                ]
+            }
+        )
+
+    flex_msg = {
+        "type": "bubble",
+        "body": {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+                {
+                    "type": "text",
+                    "text": "RECEIPT",
+                    "weight": "bold",
+                    "color": "#1DB446",
+                    "size": "sm"
+                },
+                {
+                    "type": "text",
+                    "text": receipt_data.get("ReceiptStoreName"),
+                    "weight": "bold",
+                    "size": "xxl",
+                    "margin": "md"
+                },
+                {
+                    "type": "text",
+                    "text": receipt_data.get("ReceiptAddress"),
+                    "size": "xs",
+                    "color": "#aaaaaa",
+                    "wrap": True
+                },
+                {
+                    "type": "separator",
+                    "margin": "xxl"
+                },
+                {
+                    "type": "box",
+                    "layout": "vertical",
+                    "margin": "xxl",
+                    "spacing": "sm",
+                    "contents": items_contents
+                },
+                {
+                    "type": "separator",
+                    "margin": "xxl"
+                },
+                {
+                    "type": "box",
+                    "layout": "horizontal",
+                    "margin": "md",
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": "RECEIPT ID",
+                            "size": "xs",
+                            "color": "#aaaaaa",
+                            "flex": 0
+                        },
+                        {
+                            "type": "text",
+                            "text": "#743289384279",
+                            "color": "#aaaaaa",
+                            "size": "xs",
+                            "align": "end"
+                        }
+                    ]
+                }
+            ]
+        },
+        "styles": {
+            "footer": {
+                "separator": True
+            }
+        }
+    }
+    return FlexSendMessage(
+        alt_text="Receipt Data", contents=flex_msg)

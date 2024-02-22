@@ -32,6 +32,7 @@ import json
 import aiohttp
 import PIL.Image
 from firebase import firebase
+from flex import get_receipt_flex_msg
 
 # get channel_secret and channel_access_token from your environment variable
 channel_secret = os.getenv('ChannelSecret', None)
@@ -197,11 +198,13 @@ async def handle_callback(request: Request):
 
             # 創建回復消息
             reply_msg = TextSendMessage(text=result.text)
+            flex_msg = get_receipt_flex_msg(receipt_obj, items)
 
             # 使用 LINE Bot API 回復消息
             await line_bot_api.reply_message(
                 event.reply_token,
-                reply_msg
+                reply_msg,
+                flex_msg
             )
         else:
             continue
