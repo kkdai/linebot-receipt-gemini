@@ -46,8 +46,8 @@ I will need to input it into a database with the following structure:
  Receipts(ReceiptID, PurchaseDate, TotalAmount) and 
  Items(ItemID, ReceiptID, ItemName, ItemPrice). 
 
-if there is no ReceiptID, using PurchaseDate as unique ReceiptID. 
-If there is no ItemID, using sequel number in that receipt.
+- ReceiptID, using PurchaseDate as unique ReceiptID. 
+- ItemID, using PurchaseDate with sequel number in that receipt. (e.g. 20240401-1, 20240401-2...)
 Otherwise, if any information is unclear, fill in with 'N/A'. 
 '''
 
