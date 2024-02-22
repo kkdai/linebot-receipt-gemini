@@ -13,7 +13,7 @@
 #  under the License.
 
 from linebot.models import (
-    MessageEvent, TextMessage, TextSendMessage,
+    MessageEvent, TextSendMessage, FlexSendMessage,
 )
 from linebot.exceptions import (
     InvalidSignatureError
@@ -113,6 +113,24 @@ async def handle_callback(request: Request):
             if msg == '!清空':
                 reply_msg = TextSendMessage(text='對話歷史紀錄已經清空！')
                 fdb.delete(user_chat_path, None)
+            elif msg == '!flex':
+                # 使用範例
+                flex_msg = {
+                    "type": "bubble",
+                    "body": {
+                        "type": "box",
+                        "layout": "vertical",
+                        "contents": [
+                            {
+                                "type": "text",
+                                "text": "Hello, World!"
+                            }
+                        ]
+                    }
+                }
+                reply_msg = FlexSendMessage(
+                    alt_text="Hello, World!", contents=flex_msg)
+
             elif msg == '!qq':
                 # 使用範例
                 items_and_total_on_date = find_items_and_total_on_date(
