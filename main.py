@@ -47,7 +47,7 @@ I will need to input it into a database with the following structure:
  Items(ItemID, ReceiptID, ItemName, ItemPrice). 
 
 - ReceiptID, using PurchaseDate as unique ReceiptID. 
-- ItemID, using PurchaseDate with sequel number in that receipt. (e.g. 20240401-1, 20240401-2...)
+- ItemID, using PurchaseDate and sequel number in that receipt. 
 Otherwise, if any information is unclear, fill in with 'N/A'. 
 '''
 
