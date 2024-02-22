@@ -136,14 +136,15 @@ async def handle_callback(request: Request):
             if receipt_data:
                 # Extract the necessary information from receipt_data
                 print(f"----Extract Receipt data----")
-                receipt_id = receipt_data.get('ReceiptID')
+                receipt = receipt_data.get('Receipt')
+                receipt_id = receipt.get('ReceiptID')
                 if not receipt_id:
-                    receipt_id = receipt_data.get('PurchaseDate')
-                purchase_date = receipt_data.get('PurchaseDate')
+                    receipt_id = receipt.get('PurchaseDate')
+                purchase_date = receipt.get('PurchaseDate')
                 print(f"Purchase Date: {purchase_date}")
-                total_amount = receipt_data.get('TotalAmount')
+                total_amount = receipt.get('TotalAmount')
                 print(f"Total Amount: {total_amount}")
-                items = receipt_data.get('Items', [])
+                items = receipt.get('Items', [])
 
                 # Prepare the items list with the required keys
                 items_list = []
