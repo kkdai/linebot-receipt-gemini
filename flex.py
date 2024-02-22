@@ -29,6 +29,7 @@ def get_receipt_flex_msg(receipt_data, items):
             }
         )
 
+    print("items_contents:", items_contents)
     flex_msg = {
         "type": "bubble",
         "body": {
@@ -100,5 +101,6 @@ def get_receipt_flex_msg(receipt_data, items):
             }
         }
     }
+    print("flex:", flex_msg)
     return FlexSendMessage(
         alt_text="Receipt Data", contents=flex_msg)
