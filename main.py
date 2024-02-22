@@ -143,15 +143,19 @@ def find_purchase_details_of_item(item_name):
     """
     查找購買特定物品的日期和花費的金額。
     """
-    items = fdb.get(
-        '/Items', None, params={'orderBy': '"ItemName"', 'equalTo': f'"{item_name}"'})
-    purchase_details = []
-    if items:
-        for item_id, item in items.items():
-            receipt = fdb.get(f'/Receipts/{item["ReceiptID"]}', None)
-            if receipt:
-                purchase_details.append({
-                    'date': receipt['PurchaseDate'],
-                    'price': item['ItemPrice']
-                })
-    return purchase_details
+    try:
+        items = fdb.get(
+            '/Items', None, params={'orderBy': '"ItemName"', 'equalTo': f'"{item_name}"'})
+        purchase_details = []
+        if items:
+            for item_id, item in items.items():
+                receipt = fdb.get(f'/Receipts/{item["ReceiptID"]}', None)
+                if receipt:
+                    purchase_details.append({
+                        'date': receipt['PurchaseDate'],
+                        'price': item['ItemPrice']
+                    })
+        return purchase_details
+    except Exception as e:
+        print(f"Error in find_purchase_details_of_item: {e}")
+        return None
