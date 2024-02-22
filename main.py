@@ -95,10 +95,11 @@ async def handle_callback(request: Request):
             user_id = event.source.user_id
             # msg_type = event.source.type
             user_chat_path = f'chat/{user_id}'
+            global user_receipt_path
             user_receipt_path = f'receipt_helper/{user_id}/Receipts'
+            global user_item_path
             user_item_path = f'receipt_helper/{user_id}/Items'
             chatgpt = fdb.get(user_chat_path, None)
-            tk = event.reply_token
 
             if chatgpt is None:
                 messages = []
