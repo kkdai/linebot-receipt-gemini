@@ -65,6 +65,8 @@ session = aiohttp.ClientSession()
 async_http_client = AiohttpAsyncHttpClient(session)
 line_bot_api = AsyncLineBotApi(channel_access_token, async_http_client)
 parser = WebhookParser(channel_secret)
+user_receipt_path = f''
+user_item_path = f''
 
 # Initialize the Firebase Database
 fdb = firebase.FirebaseApplication(firebase_url, None)
@@ -93,7 +95,8 @@ async def handle_callback(request: Request):
             user_id = event.source.user_id
             # msg_type = event.source.type
             user_chat_path = f'chat/{user_id}'
-            chat_state_path = f'state/{user_id}'
+            user_receipt_path = f'receipt_helper/{user_id}/Receipts'
+            user_item_path = f'receipt_helper/{user_id}/Items'
             chatgpt = fdb.get(user_chat_path, None)
             tk = event.reply_token
 
@@ -207,12 +210,12 @@ def find_items_and_total_on_date(date):
     """
     try:
         receipts = fdb.get(
-            '/Receipts', None, params={'orderBy': '"PurchaseDate"', 'equalTo': f'"{date}"'})
+            user_receipt_path, None, params={'orderBy': '"PurchaseDate"', 'equalTo': f'"{date}"'})
         items_and_total = {'items': [], 'total': 0}
         if receipts:
             for receipt_id, receipt in receipts.items():
                 items = fdb.get(
-                    f'/Items', None, params={'orderBy': '"ReceiptID"', 'equalTo': receipt_id})
+                    user_item_path, None, params={'orderBy': '4$ID"', 'equalTo': receipt_id})
                 if items:
                     for item_id, item in items.items():
                         items_and_total['items'].append(item)
@@ -229,11 +232,12 @@ def find_purchase_details_of_item(item_name):
     """
     try:
         items = fdb.get(
-            '/Items', None, params={'orderBy': '"ItemName"', 'equalTo': f'"{item_name}"'})
+            user_item_path, None, params={'orderBy': '"ItemName"', 'equalTo': f'"{item_name}"'})
         purchase_details = []
         if items:
             for item_id, item in items.items():
-                receipt = fdb.get(f'/Receipts/{item["ReceiptID"]}', None)
+                receipt = fdb.get(
+                    f'{user_item_path}/{item["ReceiptID"]}', None)
                 if receipt:
                     purchase_details.append({
                         'date': receipt['PurchaseDate'],
@@ -279,7 +283,7 @@ def add_receipt(receipt_id, purchase_date, total_amount, items):
             'PurchaseDate': purchase_date,
             'TotalAmount': total_amount
         }
-        fdb.put('/Receipts', receipt_id, receipt_data)
+        fdb.put(user_receipt_path, receipt_id, receipt_data)
 
         # Add each item to the 'Items' collection
         for item in items:
@@ -290,7 +294,7 @@ def add_receipt(receipt_id, purchase_date, total_amount, items):
                 'ItemName': item.get('ItemName'),
                 'ItemPrice': item.get('ItemPrice')
             }
-            fdb.put('/Items', item_id, item_data)
+            fdb.put(user_item_path, item_id, item_data)
 
         print(f"ReceiptID: {receipt_id}")
     except Exception as e:
