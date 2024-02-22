@@ -51,6 +51,7 @@ Data format as follow:
 - ReceiptID, using PurchaseDate, but Represent the year, month, day, hour, and minute without any separators.
 - ItemID, using ReceiptID and sequel number in that receipt. 
 Otherwise, if any information is unclear, fill in with 'N/A'. 
+All json data need to translate into zh-tw.
 '''
 
 if channel_secret is None:
