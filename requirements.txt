@@ -1,4 +1,4 @@
-line-bot-sdk==3.5.0
+line-bot-sdk==2.4.3
 fastapi
 uvicorn[standard]
 google.generativeai
