@@ -117,7 +117,7 @@ async def handle_callback(request: Request):
         elif (event.message.type == "image"):
             content = await line_bot_api.get_message_content(event.message.id)
             img_data = b''
-            async for chunk in content.iter_any():
+            async for chunk in content.iter_content():
                 img_data += chunk
             img = PIL.Image.open(BytesIO(img_data))
             result = await generate_blog_post_from_image(
