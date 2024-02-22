@@ -146,6 +146,12 @@ async def handle_callback(request: Request):
 
             # Check if receipt_data is not None
             if receipt_json_obj:
+                if isinstance(receipt_json_obj, list):
+                    print("receipt_obj is a list.")
+                    receipt_json_obj = receipt_json_obj[0]
+                else:
+                    print("receipt_obj is not a list.")
+
                 # Extract the necessary information from receipt_data
                 print(f"----Extract Receipt data----")
                 receipt_obj = receipt_json_obj.get('Receipt')
