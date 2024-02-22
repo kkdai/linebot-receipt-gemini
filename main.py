@@ -141,7 +141,7 @@ async def handle_callback(request: Request):
 
             # Convert the JSON string to a Python object using parse_receipt_json
             receipt_json_obj = parse_receipt_json(result.text)
-            print(f"Receipt data: >{receipt_json_data}<")
+            print(f"Receipt data: >{receipt_json_obj}<")
 
             # Check if receipt_data is not None
             if receipt_json_obj:
