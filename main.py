@@ -105,7 +105,7 @@ async def handle_callback(request: Request):
             messages.append({"role": "user", "parts": msg})
             model = genai.GenerativeModel('gemini-pro')
             response = model.generate_content(messages)
-            messages.append({"role": "assistant", "parts": response.text})
+            messages.append({"role": "model", "parts": response.text})
             reply_msg = TextSendMessage(text=response.text)
             fdb.put_async(user_chat_path, None, messages)
 
