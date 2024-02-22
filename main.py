@@ -37,6 +37,7 @@ channel_secret = os.getenv('ChannelSecret', None)
 channel_access_token = os.getenv('ChannelAccessToken', None)
 gemini_key = os.getenv('GEMINI_API_KEY')
 firebase_url = os.getenv('FIREBASE_URL')
+imgage_prompt = "This is a receipt, and you are a secretary. Please organize the details from the receipt into JSON format for me. If any information is unclear, fill in with 'N/A'. I only need the JSON representation of the receipt data. Eventually, I will need to input it into a database with the following structure: Receipts(ReceiptID, PurchaseDate, TotalAmount) and Items(ItemID, ReceiptID, ItemName, ItemPrice)."
 
 if channel_secret is None:
     print('Specify LINE_CHANNEL_SECRET as environment variable.')
@@ -124,7 +125,7 @@ async def handle_callback(request: Request):
 
             # 處理圖片並生成博客文章
             result = generate_blog_post_from_image(
-                img, "A blog post about this image")
+                img, imgage_prompt)
 
             # 創建回復消息
             reply_msg = TextSendMessage(text=result.text)
