@@ -46,7 +46,9 @@ I will need to input it into a database with the following structure:
  Receipts(ReceiptID, PurchaseDate, TotalAmount) and 
  Items(ItemID, ReceiptID, ItemName, ItemPrice). 
 
-- ReceiptID, using PurchaseDate as unique ReceiptID. 
+Data format as follow:
+- PurchaseDate: Represent the year, month, day, hour, and minute without any separators.
+- ReceiptID, using PurchaseDate. 
 - ItemID, using PurchaseDate and sequel number in that receipt. 
 Otherwise, if any information is unclear, fill in with 'N/A'. 
 '''
