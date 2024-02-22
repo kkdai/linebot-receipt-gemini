@@ -114,9 +114,9 @@ async def handle_callback(request: Request):
                 reply_msg
             )
         elif (event.message.type == "image"):
-            sendImage = line_bot_api.get_message_content(event.message.id)
+            sendImage = await line_bot_api.get_message_content(event.message.id)
             img = PIL.Image.open(sendImage)
-            result = generate_blog_post_from_image(
+            result = await generate_blog_post_from_image(
                 img, "A blog post about this image")
             reply_msg = TextSendMessage(text=result.text)
         else:
