@@ -115,17 +115,13 @@ async def handle_callback(request: Request):
                 reply_msg
             )
         elif (event.message.type == "image"):
-            content = line_bot_api.get_message_content(event.message.id)
-            # 指定圖片要保存的本地文件路徑
-            image_path = f'tmp_image_{event.message.id}.jpg'
+            message_content = line_bot_api.get_message_content(
+                event.message.id)
+            image_content = b''
+            for chunk in message_content.iter_content():
+                image_content += chunk
 
-            # 將圖片數據寫入本地文件
-            with open(image_path, 'wb') as fd:
-                for chunk in content.iter_content():
-                    fd.write(chunk)
-
-            # 使用 PIL 從本地文件讀取圖片
-            img = PIL.Image.open(image_path)
+            img = PIL.Image.open(BytesIO(image_content))
 
             # 處理圖片並生成博客文章
             result = await generate_blog_post_from_image(
