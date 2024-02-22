@@ -122,18 +122,22 @@ def find_items_and_total_on_date(date):
     """
     查找特定日期購買的所有物品和總金額。
     """
-    receipts = fdb.get(
-        '/Receipts', None, params={'orderBy': '"PurchaseDate"', 'equalTo': f'"{date}"'})
-    items_and_total = {'items': [], 'total': 0}
-    if receipts:
-        for receipt_id, receipt in receipts.items():
-            items = fdb.get(
-                f'/Items', None, params={'orderBy': '"ReceiptID"', 'equalTo': receipt_id})
-            if items:
-                for item_id, item in items.items():
-                    items_and_total['items'].append(item)
-                    items_and_total['total'] += item['ItemPrice']
-    return items_and_total
+    try:
+        receipts = fdb.get(
+            '/Receipts', None, params={'orderBy': '"PurchaseDate"', 'equalTo': f'"{date}"'})
+        items_and_total = {'items': [], 'total': 0}
+        if receipts:
+            for receipt_id, receipt in receipts.items():
+                items = fdb.get(
+                    f'/Items', None, params={'orderBy': '"ReceiptID"', 'equalTo': receipt_id})
+                if items:
+                    for item_id, item in items.items():
+                        items_and_total['items'].append(item)
+                        items_and_total['total'] += item['ItemPrice']
+        return items_and_total
+    except Exception as e:
+        print(f"Error in find_items_and_total_on_date: {e}")
+        return None
 
 
 def find_purchase_details_of_item(item_name):
