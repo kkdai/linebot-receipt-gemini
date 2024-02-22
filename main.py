@@ -266,8 +266,7 @@ def add_receipt(receipt_id, purchase_date, total_amount, items):
                 'ItemPrice': item.get('ItemPrice')
             })
 
-        print(f"Receipt and items added successfully for ReceiptID: {
-              receipt_id}")
+        print(f"ReceiptID: {receipt_id}")
     except Exception as e:
         print(f"Error in add_receipt: {e}")
 
