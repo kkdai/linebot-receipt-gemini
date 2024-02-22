@@ -27,6 +27,7 @@ import google.generativeai as genai
 import os
 import sys
 from io import BytesIO
+import json
 
 import aiohttp
 import PIL.Image
@@ -124,8 +125,42 @@ async def handle_callback(request: Request):
             img = PIL.Image.open(BytesIO(image_content))
 
             # 處理圖片並生成博客文章
-            result = generate_blog_post_from_image(
+            result = generate_json_from_receipt_image(
                 img, imgage_prompt)
+
+            # Convert the JSON string to a Python object using parse_receipt_json
+            receipt_data = parse_receipt_json(result.text)
+            print(f"Receipt data: {receipt_data}")
+
+            # Check if receipt_data is not None
+            if receipt_data:
+                # Extract the necessary information from receipt_data
+                receipt_id = receipt_data.get('ReceiptID')
+                purchase_date = receipt_data.get('PurchaseDate')
+                total_amount = receipt_data.get('TotalAmount')
+                items = receipt_data.get('Items', [])
+
+                # Prepare the items list with the required keys
+                items_list = []
+                for item in items:
+                    item_dict = {
+                        'ItemID': item.get('ItemID'),
+                        'ItemName': item.get('ItemName'),
+                        'ItemPrice': item.get('ItemPrice')
+                    }
+                    items_list.append(item_dict)
+
+                print(f"Receipt ID: {receipt_id}, Purchase Date: {
+                      purchase_date}, Total Amount: {total_amount}, Items: {items_list}")
+
+                # Call the add_receipt function with the extracted information
+                add_receipt(
+                    receipt_id=receipt_id,
+                    purchase_date=purchase_date,
+                    total_amount=total_amount,
+                    items=items_list)
+            else:
+                print("Failed to parse the receipt JSON.")
 
             # 創建回復消息
             reply_msg = TextSendMessage(text=result.text)
@@ -185,22 +220,68 @@ def find_purchase_details_of_item(item_name):
         return None
 
 
-def generate_blog_post_from_image(img, prompt):
+def generate_json_from_receipt_image(img, prompt):
     """
-    使用生成模型根據圖片和提示文本生成博客文章。
+    Generate a JSON representation of the receipt data from the image using the generative model.
 
-    :param img: 圖片的數據或者圖片的路徑。
-    :param prompt: 提示文本，用於指導生成的內容。
-    :return: 生成的內容結果。
+    :param img: image of the receipt.
+    :param prompt: prompt for the generative model.
+    :return: the generated JSON representation of the receipt data.
     """
     # 創建生成模型的實例
     model = genai.GenerativeModel('gemini-pro-vision')
-
     # 調用模型生成內容
     response = model.generate_content([prompt, img], stream=True)
-
-    # 等待響應解析完成
+    # 等待生成完成
     response.resolve()
-
     # 返回生成的結果
     return response
+
+
+def add_receipt(receipt_id, purchase_date, total_amount, items):
+    """
+    Adds a new receipt and its associated items to the Firebase database.
+
+    :param receipt_id: The unique identifier for the receipt.
+    :param purchase_date: The date of the purchase.
+    :param total_amount: The total amount of the purchase.
+    :param items: A list of dictionaries, each containing the item details.
+    """
+    try:
+        # Add the receipt to the 'Receipts' collection
+        receipt_ref = fdb.reference('/Receipts')
+        receipt_ref.child(str(receipt_id)).set({
+            'PurchaseDate': purchase_date,
+            'TotalAmount': total_amount
+        })
+
+        # Add each item to the 'Items' collection
+        items_ref = fdb.reference('/Items')
+        for item in items:
+            item_id = item.get('ItemID')
+            items_ref.child(str(item_id)).set({
+                'ReceiptID': receipt_id,
+                'ItemName': item.get('ItemName'),
+                'ItemPrice': item.get('ItemPrice')
+            })
+
+        print(f"Receipt and items added successfully for ReceiptID: {
+              receipt_id}")
+    except Exception as e:
+        print(f"Error in add_receipt: {e}")
+
+
+def parse_receipt_json(receipt_json_str):
+    """
+    Parses a JSON string representing a receipt and returns a Python dictionary.
+
+    :param receipt_json_str: A JSON string representing the receipt.
+    :return: A Python dictionary representing the receipt.
+    """
+    try:
+        # Convert JSON string to Python dictionary
+        receipt_data = json.loads(receipt_json_str)
+        return receipt_data
+    except json.JSONDecodeError as e:
+        print(f"Error parsing JSON: {e}")
+        return None
