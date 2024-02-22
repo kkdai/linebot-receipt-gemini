@@ -274,13 +274,18 @@ def add_receipt(receipt_id, purchase_date, total_amount, items):
 def parse_receipt_json(receipt_json_str):
     """
     Parses a JSON string representing a receipt and returns a Python dictionary.
+    Removes the first and last lines of the input string before parsing.
 
     :param receipt_json_str: A JSON string representing the receipt.
     :return: A Python dictionary representing the receipt.
     """
     try:
+        # Split the string into lines
+        lines = receipt_json_str.strip().split('\n')
+        # Remove the first and last lines
+        json_str = '\n'.join(lines[1:-1])
         # Convert JSON string to Python dictionary
-        receipt_data = json.loads(receipt_json_str)
+        receipt_data = json.loads(json_str)
         return receipt_data
     except json.JSONDecodeError as e:
         print(f"Error parsing JSON: {e}")
