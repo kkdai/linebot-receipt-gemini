@@ -1,8 +1,7 @@
 line-bot-sdk==3.5.0
 fastapi
 uvicorn[standard]
-langchain==0.0.308
-openai==0.28.1
+google.generativeai
 yfinance
 pydantic
 tiktoken

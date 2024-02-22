@@ -23,7 +23,7 @@ from linebot import (
     AsyncLineBotApi, WebhookParser
 )
 from fastapi import Request, FastAPI, HTTPException
-import openai
+import google.generativeai as genai
 import os
 import sys
 
@@ -33,7 +33,7 @@ from firebase import firebase
 # get channel_secret and channel_access_token from your environment variable
 channel_secret = os.getenv('ChannelSecret', None)
 channel_access_token = os.getenv('ChannelAccessToken', None)
-openai.api_key = os.getenv('OPENAI_API_KEY')
+gemini_key = os.getenv('GEMINI_API_KEY')
 firebase_url = os.getenv('FIREBASE_URL')
 
 if channel_secret is None:
@@ -43,12 +43,17 @@ if channel_access_token is None:
     print('Specify LINE_CHANNEL_ACCESS_TOKEN as environment variable.')
     sys.exit(1)
 
+# Initialize the FastAPI app for LINEBot
 app = FastAPI()
 session = aiohttp.ClientSession()
 async_http_client = AiohttpAsyncHttpClient(session)
 line_bot_api = AsyncLineBotApi(channel_access_token, async_http_client)
 parser = WebhookParser(channel_secret)
+
+# Initialize the Firebase Database
 fdb = firebase.FirebaseApplication(firebase_url, None)
+# Initialize the Gemini Pro API
+genai.configure(api_key=gemini_key)
 
 
 @app.post("/callback")
@@ -77,7 +82,6 @@ async def handle_callback(request: Request):
         chatgpt = fdb.get(user_chat_path, None)
         tk = event.reply_token
 
-        # tool_result = open_ai_agent.run(event.message.text)
         if chatgpt is None:
             messages = []
         else:
@@ -98,16 +102,11 @@ async def handle_callback(request: Request):
             reply_msg = TextSendMessage(
                 text=f"Items and total on 12/25: {items_and_total_on_date}")
         else:
-            messages.append({"role": "user", "content": msg})
-            response = openai.ChatCompletion.create(
-                model="gpt-3.5-turbo",
-                max_tokens=128,
-                temperature=0.5,
-                messages=messages
-            )
-            ai_msg = response.choices[0].message.content.replace('\n', '')
-            messages.append({"role": "assistant", "content": ai_msg})
-            reply_msg = TextSendMessage(text=ai_msg)
+            messages.append({"role": "user", "parts": msg})
+            model = genai.GenerativeModel('gemini-pro')
+            response = model.generate_content(messages)
+            messages.append({"role": "assistant", "content": response.text})
+            reply_msg = TextSendMessage(text=response.text)
             fdb.put_async(user_chat_path, None, messages)
 
         await line_bot_api.reply_message(

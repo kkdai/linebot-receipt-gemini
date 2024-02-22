@@ -1,11 +1,12 @@
 {
   "name": "linebot receipt helper",
-  "description": "Quick LINEBot with Langchain",
+  "description": "LINEBot with Gemini Pro with Firebase",
   "repository": "https://github.com/kkdai/linebot-receipt-gemini",
   "keywords": [
     "python",
     "linebot",
-    "gemini"
+    "gemini",
+    "firebase"
   ],
   "buildpacks": [
     {
@@ -16,8 +17,8 @@
     }
   ],
   "env": {
-    "OPENAI_API_KEY": {
-      "description": "OpenAI Access Token",
+    "GEMINI_API_KEY": {
+      "description": "GEMINI API KEY",
       "required": true
     },
     "ChannelAccessToken": {
