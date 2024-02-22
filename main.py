@@ -121,7 +121,8 @@ async def handle_callback(request: Request):
 
             # 將圖片數據寫入本地文件
             with open(image_path, 'wb') as fd:
-                fd.write(content.content)
+                for chunk in content.iter_content():
+                    fd.write(chunk)
 
             # 使用 PIL 從本地文件讀取圖片
             img = PIL.Image.open(image_path)
