@@ -92,7 +92,8 @@ async def handle_callback(request: Request):
             fdb.delete(user_chat_path, None)
         elif msg == '!qq':
             # 使用範例
-            items_and_total_on_date = find_items_and_total_on_date('12/25')
+            items_and_total_on_date = find_items_and_total_on_date(
+                '2023-12-25')
             print(f"Items and total on 12/25: {items_and_total_on_date}")
             reply_msg = TextSendMessage(
                 text=f"Items and total on 12/25: {items_and_total_on_date}")
