@@ -5,4 +5,5 @@ google.generativeai
 yfinance
 pydantic
 tiktoken
+Pillow
 git+https://github.com/ozgur/python-firebase
