@@ -72,47 +72,53 @@ async def handle_callback(request: Request):
     for event in events:
         if not isinstance(event, MessageEvent):
             continue
-        if not isinstance(event.message, TextMessage):
+
+        if (event.message.type == "text"):
+            user_id = event.source.user_id
+            # msg_type = event.source.type
+            user_chat_path = f'chat/{user_id}'
+            chat_state_path = f'state/{user_id}'
+            chatgpt = fdb.get(user_chat_path, None)
+            tk = event.reply_token
+
+            if chatgpt is None:
+                messages = []
+            else:
+                messages = chatgpt
+
+            # Provide a default value for reply_msg
+            reply_msg = TextSendMessage(text='No message to reply with')
+
+            msg = event.message.text
+            if msg == '!清空':
+                reply_msg = TextSendMessage(text='對話歷史紀錄已經清空！')
+                fdb.delete(user_chat_path, None)
+            elif msg == '!qq':
+                # 使用範例
+                items_and_total_on_date = find_items_and_total_on_date(
+                    '2023-12-25')
+                print(f"Items and total on 12/25: {items_and_total_on_date}")
+                reply_msg = TextSendMessage(
+                    text=f"Items and total on 12/25: {items_and_total_on_date}")
+            else:
+                messages.append({"role": "user", "parts": msg})
+                model = genai.GenerativeModel('gemini-pro')
+                response = model.generate_content(messages)
+                messages.append({"role": "model", "parts": response.text})
+                reply_msg = TextSendMessage(text=response.text)
+                fdb.put_async(user_chat_path, None, messages)
+
+            await line_bot_api.reply_message(
+                event.reply_token,
+                reply_msg
+            )
+        elif (event.message.type == "image"):
+            SendImage = line_bot_api.get_message_content(event.message.id)
+            result = generate_blog_post_from_image(
+                SendImage, "A blog post about this image")
+            reply_msg = TextSendMessage(text=result.text)
+        else:
             continue
-
-        user_id = event.source.user_id
-        # msg_type = event.source.type
-        user_chat_path = f'chat/{user_id}'
-        chat_state_path = f'state/{user_id}'
-        chatgpt = fdb.get(user_chat_path, None)
-        tk = event.reply_token
-
-        if chatgpt is None:
-            messages = []
-        else:
-            messages = chatgpt
-
-        # Provide a default value for reply_msg
-        reply_msg = TextSendMessage(text='No message to reply with')
-
-        msg = event.message.text
-        if msg == '!清空':
-            reply_msg = TextSendMessage(text='對話歷史紀錄已經清空！')
-            fdb.delete(user_chat_path, None)
-        elif msg == '!qq':
-            # 使用範例
-            items_and_total_on_date = find_items_and_total_on_date(
-                '2023-12-25')
-            print(f"Items and total on 12/25: {items_and_total_on_date}")
-            reply_msg = TextSendMessage(
-                text=f"Items and total on 12/25: {items_and_total_on_date}")
-        else:
-            messages.append({"role": "user", "parts": msg})
-            model = genai.GenerativeModel('gemini-pro')
-            response = model.generate_content(messages)
-            messages.append({"role": "model", "parts": response.text})
-            reply_msg = TextSendMessage(text=response.text)
-            fdb.put_async(user_chat_path, None, messages)
-
-        await line_bot_api.reply_message(
-            event.reply_token,
-            reply_msg
-        )
 
     return 'OK'
 
@@ -159,3 +165,24 @@ def find_purchase_details_of_item(item_name):
     except Exception as e:
         print(f"Error in find_purchase_details_of_item: {e}")
         return None
+
+
+def generate_blog_post_from_image(img, prompt):
+    """
+    使用生成模型根據圖片和提示文本生成博客文章。
+
+    :param img: 圖片的數據或者圖片的路徑。
+    :param prompt: 提示文本，用於指導生成的內容。
+    :return: 生成的內容結果。
+    """
+    # 創建生成模型的實例
+    model = genai.GenerativeModel('gemini-pro-vision')
+
+    # 調用模型生成內容
+    response = model.generate_content([prompt, img], stream=True)
+
+    # 等待響應解析完成
+    result = response.resolve()
+
+    # 返回生成的結果
+    return result
