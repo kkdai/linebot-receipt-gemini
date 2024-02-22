@@ -38,7 +38,7 @@ channel_secret = os.getenv('ChannelSecret', None)
 channel_access_token = os.getenv('ChannelAccessToken', None)
 gemini_key = os.getenv('GEMINI_API_KEY')
 firebase_url = os.getenv('FIREBASE_URL')
-imgage_prompt = "This is a receipt, and you are a secretary. Please organize the details from the receipt into JSON format for me. If any information is unclear, fill in with 'N/A'. I only need the JSON representation of the receipt data. Eventually, I will need to input it into a database with the following structure: Receipts(ReceiptID, PurchaseDate, TotalAmount) and Items(ItemID, ReceiptID, ItemName, ItemPrice)."
+imgage_prompt = "This is a receipt, and you are a secretary. Please organize the details from the receipt into JSON format for me. If any information is unclear, fill in with 'N/A'. I only need the JSON representation of the receipt data. Eventually, I will need to input it into a database with the following structure: Receipts(ReceiptID, PurchaseDate, TotalAmount) and Items(ItemID, ReceiptID, ItemName, ItemPrice). if there is no ReceiptID, using PurchaseDate as unique ReceiptID."
 
 if channel_secret is None:
     print('Specify LINE_CHANNEL_SECRET as environment variable.')
@@ -241,7 +241,7 @@ def generate_json_from_receipt_image(img, prompt):
 
 def add_receipt(receipt_id, purchase_date, total_amount, items):
     """
-    Adds a new receipt and its associated items to the Firebase database.
+    Adds a new receipt and its associated items to the Firebase database using the firebase package.
 
     :param receipt_id: The unique identifier for the receipt.
     :param purchase_date: The date of the purchase.
@@ -250,23 +250,26 @@ def add_receipt(receipt_id, purchase_date, total_amount, items):
     """
     try:
         # Add the receipt to the 'Receipts' collection
-        receipt_ref = fdb.reference('/Receipts')
-        receipt_ref.child(str(receipt_id)).set({
+        receipt_data = {
+            'ReceiptID': receipt_id,
             'PurchaseDate': purchase_date,
             'TotalAmount': total_amount
-        })
+        }
+        fdb.put('/Receipts', receipt_id, receipt_data)
 
         # Add each item to the 'Items' collection
-        items_ref = fdb.reference('/Items')
         for item in items:
             item_id = item.get('ItemID')
-            items_ref.child(str(item_id)).set({
+            item_data = {
+                'ItemID': item_id,
                 'ReceiptID': receipt_id,
                 'ItemName': item.get('ItemName'),
                 'ItemPrice': item.get('ItemPrice')
-            })
+            }
+            fdb.put('/Items', item_id, item_data)
 
-        print(f"ReceiptID: {receipt_id}")
+        print(f"Receipt and items added successfully for ReceiptID: {
+              receipt_id}")
     except Exception as e:
         print(f"Error in add_receipt: {e}")
 
