@@ -47,9 +47,8 @@ I will need to input it into a database with the following structure:
  Items(ItemID, ReceiptID, ItemName, ItemPrice). 
 
 Data format as follow:
-- PurchaseDate: Represent the year, month, day, hour, and minute without any separators.
-- ReceiptID, using PurchaseDate. 
-- ItemID, using PurchaseDate and sequel number in that receipt. 
+- ReceiptID, using PurchaseDate, but Represent the year, month, day, hour, and minute without any separators.
+- ItemID, using ReceiptID and sequel number in that receipt. 
 Otherwise, if any information is unclear, fill in with 'N/A'. 
 '''
 
@@ -149,7 +148,7 @@ async def handle_callback(request: Request):
             if receipt_json_obj:
                 # Extract the necessary information from receipt_data
                 print(f"----Extract Receipt data----")
-                receipt_obj = receipt_json_obj.get('Receipt')
+                receipt_obj = receipt_json_obj.get('Receipts')
                 print(f"Receipt: {receipt_obj}")
                 if receipt_obj:
                     receipt_id = receipt_obj.get('ReceiptID')
