@@ -130,14 +130,19 @@ async def handle_callback(request: Request):
 
             # Convert the JSON string to a Python object using parse_receipt_json
             receipt_data = parse_receipt_json(result.text)
-            print(f"Receipt data: {receipt_data}")
+            print(f"Receipt data: >{receipt_data}<")
 
             # Check if receipt_data is not None
             if receipt_data:
                 # Extract the necessary information from receipt_data
+                print(f"----Extract Receipt data----")
                 receipt_id = receipt_data.get('ReceiptID')
+                if not receipt_id:
+                    receipt_id = receipt_data.get('PurchaseDate')
                 purchase_date = receipt_data.get('PurchaseDate')
+                print(f"Purchase Date: {purchase_date}")
                 total_amount = receipt_data.get('TotalAmount')
+                print(f"Total Amount: {total_amount}")
                 items = receipt_data.get('Items', [])
 
                 # Prepare the items list with the required keys
