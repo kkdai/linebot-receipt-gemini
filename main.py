@@ -268,8 +268,7 @@ def add_receipt(receipt_id, purchase_date, total_amount, items):
             }
             fdb.put('/Items', item_id, item_data)
 
-        print(f"Receipt and items added successfully for ReceiptID: {
-              receipt_id}")
+        print(f"ReceiptID: {receipt_id}")
     except Exception as e:
         print(f"Error in add_receipt: {e}")
 
