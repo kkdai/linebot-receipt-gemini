@@ -38,7 +38,18 @@ channel_secret = os.getenv('ChannelSecret', None)
 channel_access_token = os.getenv('ChannelAccessToken', None)
 gemini_key = os.getenv('GEMINI_API_KEY')
 firebase_url = os.getenv('FIREBASE_URL')
-imgage_prompt = "This is a receipt, and you are a secretary. Please organize the details from the receipt into JSON format for me. If any information is unclear, fill in with 'N/A'. I only need the JSON representation of the receipt data. Eventually, I will need to input it into a database with the following structure: Receipts(ReceiptID, PurchaseDate, TotalAmount) and Items(ItemID, ReceiptID, ItemName, ItemPrice). if there is no ReceiptID, using PurchaseDate as unique ReceiptID. If there is no ItemID, using sequel number in that receipt."
+imgage_prompt = '''
+This is a receipt, and you are a secretary. 
+Please organize the details from the receipt into JSON format for me. 
+I only need the JSON representation of the receipt data. Eventually, 
+I will need to input it into a database with the following structure:
+ Receipts(ReceiptID, PurchaseDate, TotalAmount) and 
+ Items(ItemID, ReceiptID, ItemName, ItemPrice). 
+
+if there is no ReceiptID, using PurchaseDate as unique ReceiptID. 
+If there is no ItemID, using sequel number in that receipt.
+Otherwise, if any information is unclear, fill in with 'N/A'. 
+'''
 
 if channel_secret is None:
     print('Specify LINE_CHANNEL_SECRET as environment variable.')
@@ -129,23 +140,26 @@ async def handle_callback(request: Request):
                 img, imgage_prompt)
 
             # Convert the JSON string to a Python object using parse_receipt_json
-            receipt_data = parse_receipt_json(result.text)
-            print(f"Receipt data: >{receipt_data}<")
+            receipt_json_data = parse_receipt_json(result.text)
+            print(f"Receipt data: >{receipt_json_data}<")
 
             # Check if receipt_data is not None
-            if receipt_data:
+            if receipt_json_data:
+                # Parse the JSON data into a Python dictionary
+                receipt_json_obj = json.loads(receipt_json_data)
+
                 # Extract the necessary information from receipt_data
                 print(f"----Extract Receipt data----")
-                receipt = receipt_data.get('Receipt')
-                receipt_id = receipt.get('ReceiptID')
-                if not receipt_id:
-                    receipt_id = receipt.get('PurchaseDate')
-                purchase_date = receipt.get('PurchaseDate')
-                print(f"Purchase Date: {purchase_date}")
-                total_amount = receipt.get('TotalAmount')
-                print(f"Total Amount: {total_amount}")
-                items = receipt.get('Items', [])
+                receipt_obj = receipt_json_obj.get('Receipt')
+                print(f"Receipt: {receipt_obj}")
+                if receipt_obj:
+                    receipt_id = receipt_obj.get('ReceiptID')
+                    purchase_date = receipt_obj.get('PurchaseDate')
+                    print(f"Purchase Date: {purchase_date}")
+                    total_amount = receipt_obj.get('TotalAmount')
+                    print(f"Total Amount: {total_amount}")
 
+                items = receipt_json_obj.get('Items', [])
                 # Prepare the items list with the required keys
                 items_list = []
                 for item in items:
