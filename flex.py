@@ -13,7 +13,7 @@ def get_receipt_flex_msg(receipt_data, items):
                 "contents": [
                     {
                         "type": "text",
-                        "text": item.get("ItmName"),
+                        "text": item.get("ItemName"),
                         "size": "sm",
                         "color": "#555555",
                         "flex": 0
