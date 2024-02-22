@@ -115,12 +115,11 @@ async def handle_callback(request: Request):
                 reply_msg
             )
         elif (event.message.type == "image"):
-            message_content = line_bot_api.get_message_content(
+            message_content = await line_bot_api.get_message_content(
                 event.message.id)
             image_content = b''
-            for chunk in message_content.iter_content():
-                image_content += chunk
-
+            async for s in message_content.iter_content():
+                image_content += s
             img = PIL.Image.open(BytesIO(image_content))
 
             # 處理圖片並生成博客文章
