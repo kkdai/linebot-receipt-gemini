@@ -43,7 +43,7 @@ This is a receipt, and you are a secretary.
 Please organize the details from the receipt into JSON format for me. 
 I only need the JSON representation of the receipt data. Eventually, 
 I will need to input it into a database with the following structure:
- Receipts(ReceiptID, PurchaseDate, TotalAmount) and 
+ Receipt(ReceiptID, PurchaseDate, TotalAmount) and 
  Items(ItemID, ReceiptID, ItemName, ItemPrice). 
 
 Data format as follow:
@@ -148,7 +148,7 @@ async def handle_callback(request: Request):
             if receipt_json_obj:
                 # Extract the necessary information from receipt_data
                 print(f"----Extract Receipt data----")
-                receipt_obj = receipt_json_obj.get('Receipts')
+                receipt_obj = receipt_json_obj.get('Receipt')
                 print(f"Receipt: {receipt_obj}")
                 if receipt_obj:
                     receipt_id = receipt_obj.get('ReceiptID')
