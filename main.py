@@ -123,7 +123,7 @@ async def handle_callback(request: Request):
             img = PIL.Image.open(BytesIO(image_content))
 
             # 處理圖片並生成博客文章
-            result = await generate_blog_post_from_image(
+            result = generate_blog_post_from_image(
                 img, "A blog post about this image")
 
             # 創建回復消息
