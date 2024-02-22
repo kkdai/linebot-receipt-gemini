@@ -199,7 +199,7 @@ def generate_blog_post_from_image(img, prompt):
     response = model.generate_content([prompt, img], stream=True)
 
     # 等待響應解析完成
-    result = response.resolve()
+    response.resolve()
 
     # 返回生成的結果
-    return result
+    return response
