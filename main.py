@@ -43,7 +43,7 @@ This is a receipt, and you are a secretary.
 Please organize the details from the receipt into JSON format for me. 
 I only need the JSON representation of the receipt data. Eventually, 
 I will need to input it into a database with the following structure:
- Receipt(ReceiptID, PurchaseDate, TotalAmount) and 
+ Receipt(ReceiptID, PurchaseStore, PurchaseDate, PurchaseAddress, TotalAmount) and 
  Items(ItemID, ReceiptID, ItemName, ItemPrice). 
 
 Data format as follow:
@@ -162,32 +162,18 @@ async def handle_callback(request: Request):
                         print("receipt_obj is not a list.")
 
                     receipt_id = receipt_obj.get('ReceiptID')
+                    print(f"Receipt ID: {receipt_id}")
                     purchase_date = receipt_obj.get('PurchaseDate')
                     print(f"Purchase Date: {purchase_date}")
                     total_amount = receipt_obj.get('TotalAmount')
                     print(f"Total Amount: {total_amount}")
 
                 items = receipt_json_obj.get('Items', [])
-                # Prepare the items list with the required keys
-                items_list = []
-                for item in items:
-                    item_dict = {
-                        'ItemID': item.get('ItemID'),
-                        'ItemName': item.get('ItemName'),
-                        'ItemPrice': item.get('ItemPrice')
-                    }
-                    items_list.append(item_dict)
-
-                print(f"Receipt ID: {receipt_id}")
-                print(f"Purchase Date: {purchase_date}")
-                print(f"Total Amount: {total_amount}")
+                print(f"Items: {items}")
 
                 # Call the add_receipt function with the extracted information
-                add_receipt(
-                    receipt_id=receipt_id,
-                    purchase_date=purchase_date,
-                    total_amount=total_amount,
-                    items=items_list)
+                add_receipt(receipt_data=receipt_obj,
+                            items=items)
             else:
                 print("Failed to parse the receipt JSON.")
 
@@ -268,36 +254,24 @@ def generate_json_from_receipt_image(img, prompt):
     return response
 
 
-def add_receipt(receipt_id, purchase_date, total_amount, items):
+def add_receipt(receipt_data, items):
     """
     Adds a new receipt and its associated items to the Firebase database using the firebase package.
 
-    :param receipt_id: The unique identifier for the receipt.
-    :param purchase_date: The date of the purchase.
-    :param total_amount: The total amount of the purchase.
+    :param receipt_data: A dictionary containing the receipt details.
     :param items: A list of dictionaries, each containing the item details.
     """
     try:
         # Add the receipt to the 'Receipts' collection
-        receipt_data = {
-            'ReceiptID': receipt_id,
-            'PurchaseDate': purchase_date,
-            'TotalAmount': total_amount
-        }
+        receipt_id = receipt_data.get('ReceiptID')
         fdb.put(user_receipt_path, receipt_id, receipt_data)
 
         # Add each item to the 'Items' collection
         for item in items:
             item_id = item.get('ItemID')
-            item_data = {
-                'ItemID': item_id,
-                'ReceiptID': receipt_id,
-                'ItemName': item.get('ItemName'),
-                'ItemPrice': item.get('ItemPrice')
-            }
-            fdb.put(user_item_path, item_id, item_data)
+            fdb.put(user_item_path, item_id, item)
 
-        print(f"ReceiptID: {receipt_id}")
+        print(f"Add ReceiptID: {receipt_id} completed.")
     except Exception as e:
         print(f"Error in add_receipt: {e}")
 
