@@ -150,8 +150,9 @@ async def handle_callback(request: Request):
                     }
                     items_list.append(item_dict)
 
-                print(f"Receipt ID: {receipt_id}, Purchase Date: {
-                      purchase_date}, Total Amount: {total_amount}, Items: {items_list}")
+                print(f"Receipt ID: {receipt_id}")
+                print(f"Purchase Date: {purchase_date}")
+                print(f"Total Amount: {total_amount}")
 
                 # Call the add_receipt function with the extracted information
                 add_receipt(
