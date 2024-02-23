@@ -4,32 +4,103 @@ from linebot.models import FlexSendMessage
 # Get receipt flex message data from the receipt data and items
 def get_receipt_flex_msg(receipt_data, items):
     # Using Templat
-    items_contents = []
-    for item in items:
-        items_contents.append(
-            {
-                "type": "box",
-                "layout": "horizontal",
-                "contents": [
-                    {
-                        "type": "text",
-                        "text": f"{item.get('ItemName')}",
-                        "size": "sm",
-                        "color": "#555555",
-                        "flex": 0
-                    },
-                    {
-                        "type": "text",
-                        "text": f"${item.get('ItemPrice')}",
-                        "size": "sm",
-                        "color": "#111111",
-                        "align": "end"
-                    }
-                ]
-            }
-        )
+    # items_contents = []
+    # for item in items:
+    #     items_contents.append(
+    #         {
+    #             "type": "box",
+    #             "layout": "horizontal",
+    #             "contents": [
+    #                 {
+    #                     "type": "text",
+    #                     "text": f"{item.get('ItemName')}",
+    #                     "size": "sm",
+    #                     "color": "#555555",
+    #                     "flex": 0
+    #                 },
+    #                 {
+    #                     "type": "text",
+    #                     "text": f"${item.get('ItemPrice')}",
+    #                     "size": "sm",
+    #                     "color": "#111111",
+    #                     "align": "end"
+    #                 }
+    #             ]
+    #         }
+    #     )
 
-    print("items_contents:", items_contents)
+    # print("items_contents:", items_contents)
+    # flex_msg = {
+    #     "type": "bubble",
+    #     "body": {
+    #         "type": "box",
+    #         "layout": "vertical",
+    #         "contents": [
+    #             {
+    #                 "type": "text",
+    #                 "text": "RECEIPT",
+    #                 "weight": "bold",
+    #                 "color": "#1DB446",
+    #                 "size": "sm"
+    #             },
+    #             {
+    #                 "type": "text",
+    #                 "text": f"{receipt_data.get('PurchaseStore')}",
+    #                 "weight": "bold",
+    #                 "size": "xxl",
+    #                 "margin": "md"
+    #             },
+    #             {
+    #                 "type": "text",
+    #                 "text": f"{receipt_data.get('PurchaseAddress')}",
+    #                 "size": "xs",
+    #                 "color": "#aaaaaa",
+    #                 "wrap": True
+    #             },
+    #             {
+    #                 "type": "separator",
+    #                 "margin": "xxl"
+    #             },
+    #             {
+    #                 "type": "box",
+    #                 "layout": "vertical",
+    #                 "margin": "xxl",
+    #                 "spacing": "sm",
+    #                 "contents": items_contents
+    #             },
+    #             {
+    #                 "type": "separator",
+    #                 "margin": "xxl"
+    #             },
+    #             {
+    #                 "type": "box",
+    #                 "layout": "horizontal",
+    #                 "margin": "md",
+    #                 "contents": [
+    #                     {
+    #                         "type": "text",
+    #                         "text": "RECEIPT ID",
+    #                         "size": "xs",
+    #                         "color": "#aaaaaa",
+    #                         "flex": 0
+    #                     },
+    #                     {
+    #                         "type": "text",
+    #                         "text": "#743289384279",
+    #                         "color": "#aaaaaa",
+    #                         "size": "xs",
+    #                         "align": "end"
+    #                     }
+    #                 ]
+    #             }
+    #         ]
+    #     },
+    #     "styles": {
+    #         "footer": {
+    #             "separator": True
+    #         }
+    #     }
+    # }
     flex_msg = {
         "type": "bubble",
         "body": {
@@ -45,14 +116,14 @@ def get_receipt_flex_msg(receipt_data, items):
                 },
                 {
                     "type": "text",
-                    "text": f"{receipt_data.get('PurchaseStore')}",
+                    "text": "Brown Store",
                     "weight": "bold",
                     "size": "xxl",
                     "margin": "md"
                 },
                 {
                     "type": "text",
-                    "text": f"{receipt_data.get('PurchaseAddress')}",
+                    "text": "Miraina Tower, 4-1-6 Shinjuku, Tokyo",
                     "size": "xs",
                     "color": "#aaaaaa",
                     "wrap": True
@@ -66,7 +137,91 @@ def get_receipt_flex_msg(receipt_data, items):
                     "layout": "vertical",
                     "margin": "xxl",
                     "spacing": "sm",
-                    "contents": items_contents
+                    "contents": [
+                        {
+                            "type": "box",
+                            "layout": "horizontal",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": "Energy Drink",
+                                    "size": "sm",
+                                    "color": "#555555",
+                                    "flex": 0
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "$2.99",
+                                    "size": "sm",
+                                    "color": "#111111",
+                                    "align": "end"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "box",
+                            "layout": "horizontal",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": "Chewing Gum",
+                                    "size": "sm",
+                                    "color": "#555555",
+                                    "flex": 0
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "$0.99",
+                                    "size": "sm",
+                                    "color": "#111111",
+                                    "align": "end"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "box",
+                            "layout": "horizontal",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": "Bottled Water",
+                                    "size": "sm",
+                                    "color": "#555555",
+                                    "flex": 0
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "$3.33",
+                                    "size": "sm",
+                                    "color": "#111111",
+                                    "align": "end"
+                                }
+                            ]
+                        },
+                        {
+                            "type": "separator",
+                            "margin": "xxl"
+                        },
+                        {
+                            "type": "box",
+                            "layout": "horizontal",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": "TOTAL",
+                                    "size": "sm",
+                                    "color": "#555555"
+                                },
+                                {
+                                    "type": "text",
+                                    "text": "$7.31",
+                                    "size": "sm",
+                                    "color": "#111111",
+                                    "align": "end"
+                                }
+                            ]
+                        }
+                    ]
                 },
                 {
                     "type": "separator",
@@ -79,7 +234,7 @@ def get_receipt_flex_msg(receipt_data, items):
                     "contents": [
                         {
                             "type": "text",
-                            "text": "RECEIPT ID",
+                            "text": "Receipt ID",
                             "size": "xs",
                             "color": "#aaaaaa",
                             "flex": 0
