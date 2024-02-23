@@ -45,14 +45,14 @@ def get_receipt_flex_msg(receipt_data, items):
                 },
                 {
                     "type": "text",
-                    "text": f"{receipt_data.get("PurchaseStore")}",
+                    "text": f"{receipt_data.get('PurchaseStore')}",
                     "weight": "bold",
                     "size": "xxl",
                     "margin": "md"
                 },
                 {
                     "type": "text",
-                    "text": receipt_data.get("PurchaseAddress"),
+                    "text": f"{receipt_data.get('PurchaseAddress')}",
                     "size": "xs",
                     "color": "#aaaaaa",
                     "wrap": True
