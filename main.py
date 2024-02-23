@@ -210,8 +210,7 @@ async def handle_callback(request: Request):
             # 使用 LINE Bot API 回復消息
             await line_bot_api.reply_message(
                 event.reply_token,
-                reply_msg,
-                flex_msg
+                reply_msg
             )
         else:
             continue
