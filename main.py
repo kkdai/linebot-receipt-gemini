@@ -194,12 +194,18 @@ async def handle_callback(request: Request):
                 # Call the add_receipt function with the extracted information
                 add_receipt(receipt_data=receipt_obj,
                             items=items)
+                reply_msg = get_receipt_flex_msg(receipt_obj, items)
+                await line_bot_api.reply_message(
+                    event.reply_token,
+                    reply_msg
+                )
+                return 'OK'
+
             else:
                 print("Failed to parse the receipt JSON.")
 
             # 創建回復消息
             reply_msg = TextSendMessage(text=result.text)
-            flex_msg = get_receipt_flex_msg(receipt_obj, items)
 
             # 使用 LINE Bot API 回復消息
             await line_bot_api.reply_message(
