@@ -123,24 +123,6 @@ async def handle_callback(request: Request):
             if msg == '!清空':
                 reply_msg = TextSendMessage(text='對話歷史紀錄已經清空！')
                 fdb.delete(user_chat_path, None)
-            elif msg == '!flex':
-                # 使用範例
-                flex_msg = {
-                    "type": "bubble",
-                    "body": {
-                        "type": "box",
-                        "layout": "vertical",
-                        "contents": [
-                            {
-                                "type": "text",
-                                "text": "Hello, World!"
-                            }
-                        ]
-                    }
-                }
-                reply_msg = FlexSendMessage(
-                    alt_text="Hello, World!", contents=flex_msg)
-
             elif msg == '!qq':
                 # 使用範例
                 items_and_total_on_date = find_items_and_total_on_date(
@@ -171,10 +153,10 @@ async def handle_callback(request: Request):
             # 處理圖片並取得回傳結果
             result = generate_json_from_receipt_image(
                 img, imgage_prompt)
-            print(f"Before Translate Result: {result}")
+            print(f"Before Translate Result: {result.text}")
             result = generate_gemini_text_complete(
-                result + "\n --- " + json_translate_from_korean_chinese_prompt)
-            print(f"After Translate Result: {result}")
+                result.text + "\n --- " + json_translate_from_korean_chinese_prompt)
+            print(f"After Translate Result: {result.text}")
             # Convert the JSON string to a Python object using parse_receipt_json
             receipt_json_obj = parse_receipt_json(result.text)
             print(f"Receipt data: >{receipt_json_obj}<")
