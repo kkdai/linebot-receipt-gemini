@@ -13,7 +13,7 @@
 #  under the License.
 
 from linebot.models import (
-    MessageEvent, TextSendMessage, FlexSendMessage,
+    MessageEvent, TextSendMessage, FlexSendMessage, ReplyMessageRequest
 )
 from linebot.exceptions import (
     InvalidSignatureError
@@ -52,7 +52,7 @@ Data format as follow:
 - ReceiptID, using PurchaseDate, but Represent the year, month, day, hour, and minute without any separators.
 - ItemID, using ReceiptID and sequel number in that receipt. 
 Otherwise, if any information is unclear, fill in with 'N/A'. 
-All json data need to translate into zh-tw and put in Chinese columns.
+All json data need to translate into zh-tw and put in PurchaseChineseStore, PurchaseChineseAddress, ItemChineseName columns.
 '''
 
 if channel_secret is None:
@@ -196,14 +196,10 @@ async def handle_callback(request: Request):
                 add_receipt(receipt_data=receipt_obj,
                             items=items)
                 reply_msg = get_receipt_flex_msg(receipt_obj, items)
-                messages = []
-                messages.append(reply_msg)
-                messages.append(result.text)
 
-                await line_bot_api.reply_message(
-                    event.reply_token,
-                    messages
-                )
+                await line_bot_api.reply_message(ReplyMessageRequest(
+                    reply_token=event.reply_token,
+                    messages=[reply_msg, TextSendMessage(text=result.text)]))
                 return 'OK'
 
             else:
