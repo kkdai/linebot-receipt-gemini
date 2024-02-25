@@ -77,6 +77,7 @@ line_bot_api = AsyncLineBotApi(channel_access_token, async_http_client)
 parser = WebhookParser(channel_secret)
 user_receipt_path = f''
 user_item_path = f''
+user_all_receipts_path = f''
 
 # Initialize the Firebase Database
 fdb = firebase.FirebaseApplication(firebase_url, None)
@@ -102,19 +103,16 @@ async def handle_callback(request: Request):
             continue
 
         user_id = event.source.user_id
+
         global user_receipt_path
         user_receipt_path = f'receipt_helper/{user_id}/Receipts'
         global user_item_path
         user_item_path = f'receipt_helper/{user_id}/Items'
+        global user_all_receipts_path
+        user_all_receipts_path = f'receipt_helper/{user_id}'
 
         if (event.message.type == "text"):
-            user_chat_path = f'chat/{user_id}'
-            chatgpt = fdb.get(user_chat_path, None)
-
-            if chatgpt is None:
-                messages = []
-            else:
-                messages = chatgpt
+            all_receipts = fdb.get(user_all_receipts_path, None)
 
             # Provide a default value for reply_msg
             reply_msg = TextSendMessage(text='No message to reply with')
@@ -122,21 +120,13 @@ async def handle_callback(request: Request):
             msg = event.message.text
             if msg == '!清空':
                 reply_msg = TextSendMessage(text='對話歷史紀錄已經清空！')
-                fdb.delete(user_chat_path, None)
-            elif msg == '!qq':
-                # 使用範例
-                items_and_total_on_date = find_items_and_total_on_date(
-                    '2023-12-25')
-                print(f"Items and total on 12/25: {items_and_total_on_date}")
-                reply_msg = TextSendMessage(
-                    text=f"Items and total on 12/25: {items_and_total_on_date}")
+                fdb.delete(user_all_receipts_path, None)
             else:
-                messages.append({"role": "user", "parts": msg})
-                model = genai.GenerativeModel('gemini-pro')
-                response = model.generate_content(messages)
-                messages.append({"role": "model", "parts": response.text})
+                messages = []
+                messages.append(
+                    {"role": "user", "parts": "這是我所有購物清單 {all_receipts}, 請根據這些資料回答我問題。 {msg}"})
+                response = generate_gemini_text_complete(messages)
                 reply_msg = TextSendMessage(text=response.text)
-                fdb.put_async(user_chat_path, None, messages)
 
             await line_bot_api.reply_message(
                 event.reply_token,
@@ -154,48 +144,31 @@ async def handle_callback(request: Request):
             result = generate_json_from_receipt_image(
                 img, imgage_prompt)
             print(f"Before Translate Result: {result.text}")
-            result = generate_gemini_text_complete(
+            chinese_result = generate_gemini_text_complete(
                 result.text + "\n --- " + json_translate_from_korean_chinese_prompt)
-            print(f"After Translate Result: {result.text}")
+            print(f"After Translate Result: {chinese_result.text}")
             # Convert the JSON string to a Python object using parse_receipt_json
             receipt_json_obj = parse_receipt_json(result.text)
+            receipt_chinese_json_obj = parse_receipt_json(chinese_result.text)
             print(f"Receipt data: >{receipt_json_obj}<")
 
             # Check if receipt_data is not None
-            if receipt_json_obj:
-                # Extract the necessary information from receipt_data
-                print(f"----Extract Receipt data----")
-                receipt_obj = receipt_json_obj.get('Receipt')
-                print(f"Receipt: {receipt_obj}")
-                if receipt_obj:
-                    if isinstance(receipt_obj, list):
-                        print("receipt_obj is a list.")
-                        receipt_obj = receipt_obj[0]
-                    else:
-                        print("receipt_obj is not a list.")
+            items, receipt_obj = extract_receipt_data(receipt_json_obj)
+            chinese_items, chinese_receipt_obj = extract_receipt_data(
+                receipt_chinese_json_obj)
 
-                    receipt_id = receipt_obj.get('ReceiptID')
-                    print(f"Receipt ID: {receipt_id}")
-                    purchase_date = receipt_obj.get('PurchaseDate')
-                    print(f"Purchase Date: {purchase_date}")
-                    total_amount = receipt_obj.get('TotalAmount')
-                    print(f"Total Amount: {total_amount}")
+            # Call the add_receipt function with the extracted information
+            add_receipt(receipt_data=receipt_obj,
+                        items=items)
 
-                items = receipt_json_obj.get('Items', [])
-                print(f"Items: {items}")
+            reply_msg = get_receipt_flex_msg(receipt_obj, items)
+            chinese_reply_msg = get_receipt_flex_msg(
+                chinese_receipt_obj, chinese_items)
 
-                # Call the add_receipt function with the extracted information
-                add_receipt(receipt_data=receipt_obj,
-                            items=items)
-                reply_msg = get_receipt_flex_msg(receipt_obj, items)
-
-                await line_bot_api.reply_message(
-                    event.reply_token,
-                    reply_msg)
-                return 'OK'
-
-            else:
-                print("Failed to parse the receipt JSON.")
+            await line_bot_api.reply_message(
+                event.reply_token,
+                [reply_msg, chinese_reply_msg])
+            return 'OK'
 
             # 創建回復消息
             reply_msg = TextSendMessage(text=result.text)
@@ -320,3 +293,24 @@ def parse_receipt_json(receipt_json_str):
     except json.JSONDecodeError as e:
         print(f"Error parsing JSON: {e}")
         return None
+
+
+def extract_receipt_data(receipt_json_obj):
+    receipt_obj = None
+    items = []
+
+    if receipt_json_obj:
+        receipt_obj = receipt_json_obj.get('Receipt')
+
+        if receipt_obj:
+            if isinstance(receipt_obj, list):
+                receipt_obj = receipt_obj[0]
+
+            print(f"ReceiptID: {receipt_obj.get('ReceiptID')}")
+            print(f"PurchaseDate: {receipt_obj.get('PurchaseDate')}")
+            print(f"TotalAmount: {receipt_obj.get('TotalAmount')}")
+            print(f"PurchaseStore: {receipt_obj.get('PurchaseStore')}")
+
+        items = receipt_json_obj.get('Items', [])
+
+    return items, receipt_obj

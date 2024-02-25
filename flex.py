@@ -87,7 +87,7 @@ def get_receipt_flex_msg(receipt_data, items):
                         },
                         {
                             "type": "text",
-                            "text": "#743289384279",
+                            "text": f"{receipt_data.get('ReceiptID')}",
                             "color": "#aaaaaa",
                             "size": "xs",
                             "align": "end"
