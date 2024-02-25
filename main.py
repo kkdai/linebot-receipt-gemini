@@ -45,14 +45,21 @@ Please organize the details from the receipt into JSON format for me.
 I only need the JSON representation of the receipt data. Eventually, 
 I will need to input it into a database with the following structure:
 
- Receipt(ReceiptID, PurchaseStore, PurchaseChineseStore, PurchaseDate, PurchaseAddress, PurchaseChineseAddress, TotalAmount) and 
- Items(ItemID, ReceiptID, ItemName, ItemChineseName, ItemPrice). 
+ Receipt(ReceiptID, PurchaseStore, PurchaseDate, PurchaseAddress, TotalAmount) and 
+ Items(ItemID, ReceiptID, ItemName, ItemPrice). 
 
 Data format as follow:
 - ReceiptID, using PurchaseDate, but Represent the year, month, day, hour, and minute without any separators.
 - ItemID, using ReceiptID and sequel number in that receipt. 
 Otherwise, if any information is unclear, fill in with 'N/A'. 
-All json data need to translate into zh-tw and put in PurchaseChineseStore, PurchaseChineseAddress, ItemChineseName columns.
+'''
+
+json_translate_from_korean_chinese_prompt = '''
+This is a JSON representation of a receipt.
+Please translate the Korean characters into Chinese for me.
+Using format as follow:
+    Korean(Chinese)
+Please response with the translated JSON.
 '''
 
 if channel_secret is None:
@@ -164,7 +171,10 @@ async def handle_callback(request: Request):
             # 處理圖片並取得回傳結果
             result = generate_json_from_receipt_image(
                 img, imgage_prompt)
-
+            print(f"Before Translate Result: {result}")
+            result = generate_gemini_text_complete(
+                result + "\n --- " + json_translate_from_korean_chinese_prompt)
+            print(f"After Translate Result: {result}")
             # Convert the JSON string to a Python object using parse_receipt_json
             receipt_json_obj = parse_receipt_json(result.text)
             print(f"Receipt data: >{receipt_json_obj}<")
@@ -262,6 +272,15 @@ def find_purchase_details_of_item(item_name):
     except Exception as e:
         print(f"Error in find_purchase_details_of_item: {e}")
         return None
+
+
+def generate_gemini_text_complete(prompt):
+    """
+    Generate a text completion using the generative model.
+    """
+    model = genai.GenerativeModel('gemini-pro')
+    response = model.generate_content(prompt)
+    return response
 
 
 def generate_json_from_receipt_image(img, prompt):
