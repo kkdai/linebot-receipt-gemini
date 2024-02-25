@@ -94,14 +94,14 @@ async def handle_callback(request: Request):
         if not isinstance(event, MessageEvent):
             continue
 
+        user_id = event.source.user_id
+        global user_receipt_path
+        user_receipt_path = f'receipt_helper/{user_id}/Receipts'
+        global user_item_path
+        user_item_path = f'receipt_helper/{user_id}/Items'
+
         if (event.message.type == "text"):
-            user_id = event.source.user_id
-            # msg_type = event.source.type
             user_chat_path = f'chat/{user_id}'
-            global user_receipt_path
-            user_receipt_path = f'receipt_helper/{user_id}/Receipts'
-            global user_item_path
-            user_item_path = f'receipt_helper/{user_id}/Items'
             chatgpt = fdb.get(user_chat_path, None)
 
             if chatgpt is None:
