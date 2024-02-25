@@ -197,7 +197,8 @@ async def handle_callback(request: Request):
                             items=items)
                 reply_msg = get_receipt_flex_msg(receipt_obj, items)
                 messages = []
-                messages.append(reply_msg, result.text)
+                messages.append(reply_msg)
+                messages.append(result.text)
 
                 await line_bot_api.reply_message(
                     event.reply_token,
