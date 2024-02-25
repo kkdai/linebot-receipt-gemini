@@ -13,7 +13,7 @@
 #  under the License.
 
 from linebot.models import (
-    MessageEvent, TextSendMessage, FlexSendMessage, ReplyMessageRequest
+    MessageEvent, TextSendMessage, FlexSendMessage
 )
 from linebot.exceptions import (
     InvalidSignatureError
@@ -197,9 +197,9 @@ async def handle_callback(request: Request):
                             items=items)
                 reply_msg = get_receipt_flex_msg(receipt_obj, items)
 
-                await line_bot_api.reply_message(ReplyMessageRequest(
-                    reply_token=event.reply_token,
-                    messages=[reply_msg, TextSendMessage(text=result.text)]))
+                await line_bot_api.reply_message(
+                    event.reply_token,
+                    reply_msg)
                 return 'OK'
 
             else:
