@@ -44,14 +44,15 @@ This is a receipt, and you are a secretary.
 Please organize the details from the receipt into JSON format for me. 
 I only need the JSON representation of the receipt data. Eventually, 
 I will need to input it into a database with the following structure:
- Receipt(ReceiptID, PurchaseStore, PurchaseDate, PurchaseAddress, TotalAmount) and 
- Items(ItemID, ReceiptID, ItemName, ItemPrice). 
+
+ Receipt(ReceiptID, PurchaseStore, PurchaseChineseStore, PurchaseDate, PurchaseAddress, PurchaseChineseAddress, TotalAmount) and 
+ Items(ItemID, ReceiptID, ItemName, ItemChineseName, ItemPrice). 
 
 Data format as follow:
 - ReceiptID, using PurchaseDate, but Represent the year, month, day, hour, and minute without any separators.
 - ItemID, using ReceiptID and sequel number in that receipt. 
 Otherwise, if any information is unclear, fill in with 'N/A'. 
-All json data need to translate into zh-tw.
+All json data need to translate into zh-tw and put in Chinese columns.
 '''
 
 if channel_secret is None:
@@ -160,7 +161,7 @@ async def handle_callback(request: Request):
                 image_content += s
             img = PIL.Image.open(BytesIO(image_content))
 
-            # 處理圖片並生成博客文章
+            # 處理圖片並取得回傳結果
             result = generate_json_from_receipt_image(
                 img, imgage_prompt)
 
@@ -195,9 +196,12 @@ async def handle_callback(request: Request):
                 add_receipt(receipt_data=receipt_obj,
                             items=items)
                 reply_msg = get_receipt_flex_msg(receipt_obj, items)
+                messages = []
+                messages.append(reply_msg, result.text)
+
                 await line_bot_api.reply_message(
                     event.reply_token,
-                    reply_msg
+                    messages
                 )
                 return 'OK'
 
@@ -271,13 +275,9 @@ def generate_json_from_receipt_image(img, prompt):
     :param prompt: prompt for the generative model.
     :return: the generated JSON representation of the receipt data.
     """
-    # 創建生成模型的實例
     model = genai.GenerativeModel('gemini-pro-vision')
-    # 調用模型生成內容
     response = model.generate_content([prompt, img], stream=True)
-    # 等待生成完成
     response.resolve()
-    # 返回生成的結果
     return response
 
 
