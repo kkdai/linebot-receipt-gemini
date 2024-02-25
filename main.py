@@ -122,9 +122,10 @@ async def handle_callback(request: Request):
                 reply_msg = TextSendMessage(text='對話歷史紀錄已經清空！')
                 fdb.delete(user_all_receipts_path, None)
             else:
+                prompt_msg = f'這是我所有購物清單 {all_receipts}, 請根據這些資料回答我問題。 {msg}'
                 messages = []
                 messages.append(
-                    {"role": "user", "parts": "這是我所有購物清單 {all_receipts}, 請根據這些資料回答我問題。 {msg}"})
+                    {"role": "user", "parts": prompt_msg})
                 response = generate_gemini_text_complete(messages)
                 reply_msg = TextSendMessage(text=response.text)
 
