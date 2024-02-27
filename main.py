@@ -55,6 +55,12 @@ if channel_secret is None:
 if channel_access_token is None:
     print('Specify LINE_CHANNEL_ACCESS_TOKEN as environment variable.')
     sys.exit(1)
+if gemini_key is None:
+    print('Specify GEMINI_API_KEY as environment variable.')
+    sys.exit(1)
+if firebase_url is None:
+    print('Specify FIREBASE_URL as environment variable.')
+    sys.exit(1)
 
 # Initialize the FastAPI app for LINEBot
 app = FastAPI()
@@ -62,12 +68,13 @@ session = aiohttp.ClientSession()
 async_http_client = AiohttpAsyncHttpClient(session)
 line_bot_api = AsyncLineBotApi(channel_access_token, async_http_client)
 parser = WebhookParser(channel_secret)
+
+# Initialize the Firebase Database
 user_receipt_path = f''
 user_item_path = f''
 user_all_receipts_path = f''
-
-# Initialize the Firebase Database
 fdb = firebase.FirebaseApplication(firebase_url, None)
+
 # Initialize the Gemini Pro API
 genai.configure(api_key=gemini_key)
 
@@ -130,44 +137,33 @@ async def handle_callback(request: Request):
                 image_content += s
             img = PIL.Image.open(BytesIO(image_content))
 
-            # 處理圖片並取得回傳結果
+            # Using Gemini-Vision process image and get the JSON representation of the receipt data.
             result = generate_json_from_receipt_image(
                 img, imgage_prompt)
             print(f"Before Translate Result: {result.text}")
-            chinese_result = generate_gemini_text_complete(
+            tw_result = generate_gemini_text_complete(
                 result.text + "\n --- " + json_translate_from_korean_chinese_prompt)
-            print(f"After Translate Result: {chinese_result.text}")
-            # Convert the JSON string to a Python object using parse_receipt_json
-            receipt_json_obj = parse_receipt_json(result.text)
-            receipt_chinese_json_obj = parse_receipt_json(chinese_result.text)
-            print(f"Receipt data: >{receipt_json_obj}<")
+            print(f"After Translate Result: {tw_result.text}")
 
             # Check if receipt_data is not None
-            items, receipt_obj = extract_receipt_data(receipt_json_obj)
-            chinese_items, chinese_receipt_obj = extract_receipt_data(
-                receipt_chinese_json_obj)
+            items, receipt = extract_receipt_data(
+                parse_receipt_json(result.text))
+            tw_items, tw_receipt = extract_receipt_data(
+                parse_receipt_json(tw_result.text))
 
             # Call the add_receipt function with the extracted information
-            add_receipt(receipt_data=receipt_obj,
-                        items=items)
+            add_receipt(receipt_data=tw_receipt,
+                        items=tw_items)
 
-            reply_msg = get_receipt_flex_msg(receipt_obj, items)
+            # Get receipt flex message data from the receipt data and items
+            reply_msg = get_receipt_flex_msg(receipt, items)
             chinese_reply_msg = get_receipt_flex_msg(
-                chinese_receipt_obj, chinese_items)
+                tw_receipt, tw_items)
 
             await line_bot_api.reply_message(
                 event.reply_token,
                 [reply_msg, chinese_reply_msg])
             return 'OK'
-
-            # 創建回復消息
-            reply_msg = TextSendMessage(text=result.text)
-
-            # 使用 LINE Bot API 回復消息
-            await line_bot_api.reply_message(
-                event.reply_token,
-                reply_msg
-            )
         else:
             continue
 
