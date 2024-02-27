@@ -1,19 +1,5 @@
-# -*- coding: utf-8 -*-
-
-#  Licensed under the Apache License, Version 2.0 (the "License"); you may
-#  not use this file except in compliance with the License. You may obtain
-#  a copy of the License at
-#
-#       https://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-#  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-#  License for the specific language governing permissions and limitations
-#  under the License.
-
 from linebot.models import (
-    MessageEvent, TextSendMessage, FlexSendMessage
+    MessageEvent, TextSendMessage
 )
 from linebot.exceptions import (
     InvalidSignatureError
@@ -185,51 +171,6 @@ async def handle_callback(request: Request):
             continue
 
     return 'OK'
-
-
-def find_items_and_total_on_date(date):
-    """
-    查找特定日期購買的所有物品和總金額。
-    """
-    try:
-        receipts = fdb.get(
-            user_receipt_path, None, params={'orderBy': '"PurchaseDate"', 'equalTo': f'"{date}"'})
-        items_and_total = {'items': [], 'total': 0}
-        if receipts:
-            for receipt_id, receipt in receipts.items():
-                items = fdb.get(
-                    user_item_path, None, params={'orderBy': '4$ID"', 'equalTo': receipt_id})
-                if items:
-                    for item_id, item in items.items():
-                        items_and_total['items'].append(item)
-                        items_and_total['total'] += item['ItemPrice']
-        return items_and_total
-    except Exception as e:
-        print(f"Error in find_items_and_total_on_date: {e}")
-        return None
-
-
-def find_purchase_details_of_item(item_name):
-    """
-    查找購買特定物品的日期和花費的金額。
-    """
-    try:
-        items = fdb.get(
-            user_item_path, None, params={'orderBy': '"ItemName"', 'equalTo': f'"{item_name}"'})
-        purchase_details = []
-        if items:
-            for item_id, item in items.items():
-                receipt = fdb.get(
-                    f'{user_item_path}/{item["ReceiptID"]}', None)
-                if receipt:
-                    purchase_details.append({
-                        'date': receipt['PurchaseDate'],
-                        'price': item['ItemPrice']
-                    })
-        return purchase_details
-    except Exception as e:
-        print(f"Error in find_purchase_details_of_item: {e}")
-        return None
 
 
 def generate_gemini_text_complete(prompt):
