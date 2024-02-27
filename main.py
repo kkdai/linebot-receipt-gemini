@@ -109,8 +109,9 @@ async def handle_callback(request: Request):
                 reply_msg = TextSendMessage(text='對話歷史紀錄已經清空！')
                 fdb.delete(user_all_receipts_path, None)
             else:
-                prompt_msg = f'Here is my entire shopping list {
-                    all_receipts}; please answer my question based on this information. {msg}. Reply in zh_tw.'
+                # fmt: off
+                prompt_msg = f'Here is my entire shopping list {all_receipts}; please answer my question based on this information. {msg}. Reply in zh_tw.'
+                # fmt: on
                 messages = []
                 messages.append(
                     {"role": "user", "parts": prompt_msg})
