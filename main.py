@@ -59,6 +59,7 @@ This is a JSON representation of a receipt.
 Please translate the Korean characters into Chinese for me.
 Using format as follow:
     Korean(Chinese)
+All the Chinese will use in zh_tw.
 Please response with the translated JSON.
 '''
 
@@ -122,7 +123,8 @@ async def handle_callback(request: Request):
                 reply_msg = TextSendMessage(text='對話歷史紀錄已經清空！')
                 fdb.delete(user_all_receipts_path, None)
             else:
-                prompt_msg = f'這是我所有購物清單 {all_receipts}, 請根據這些資料回答我問題。 {msg}'
+                prompt_msg = f'Here is my entire shopping list {
+                    all_receipts}; please answer my question based on this information. {msg}. Reply in zh_tw.'
                 messages = []
                 messages.append(
                     {"role": "user", "parts": prompt_msg})
