@@ -1,93 +1,59 @@
-# GitHub Issues Chatbot for LINE
+# Receipt Helper
 
-This repository contains the code for a chatbot that integrates GitHub Issues with LINE messaging platform. The bot is designed to retrieve information from GitHub Issues and provide responses to user queries on LINE.
+A handy tool for travelers who struggle with understanding the content of receipts in foreign languages. This tool was created out of the need to keep track of expenses during travel without the barrier of language. It allows users to scan receipts, extract information, and translate it for easy accounting and future reference.
+
+## Project Background
+
+While traveling abroad, I often found myself puzzled by the contents of receipts. I wanted to keep track of my expenses and have the ability to review them later, but the language barrier made it difficult. This led me to develop a small utility to assist with these challenges.
+
+## Screenshot
+
+![](./img/receipt_1.png)
+
+![](./img/receipt_2.png)
 
 ## Features
 
-- Load GitHub Issues from a specified repository.
-- Use environmental variables for configuration.
-- Integrate with LINE messaging platform using the LINE Bot API.
-- Split and process text data using Langchain.
-- Retrieve and rank relevant documents using vector embeddings and FAISS.
-- Provide responses to LINE messages with information from GitHub Issues.
+- **Receipt Scanning**: Users can scan their receipts with their camera.
+- **Information Extraction**: The tool extracts and organizes details from receipts into a JSON format.
+- **Data Structuring**: Extracted data is formatted to fit a predefined database schema.
+- **Translation**: Korean characters on receipts are translated into Traditional Chinese (zh_tw) for better understanding.
+- **Receipt Management**: Users can clear their history of scanned receipts with a simple command.
+- **Integration**: The tool integrates with LINE messaging for easy use and Firebase for data storage.
 
-## Requirements
+## Technologies Used
 
-- Python 3.6 or higher
-- aiohttp
-- fastapi
-- line-bot-sdk
-- python-dotenv
-- langchain
-- langchain_openai
-- langchain_core
-- langchain_community
+- Python 3
+- FastAPI
+- LINE Messaging API
+- Google Generative AI
+- Aiohttp
+- PIL (Python Imaging Library)
+- Firebase
 
-## Installation
+## Setup
 
-Before running the chatbot, you need to install the required dependencies:
-
-```bash
-pip install aiohttp fastapi line-bot-sdk python-dotenv langchain langchain_openai langchain_core langchain_community
-```
-
-## Configuration
-
-Set the following environment variables:
-
-- `GITHUB_TOKEN`: Your GitHub access token.
-- `ChannelSecret`: Your LINE channel secret.
-- `ChannelAccessToken`: Your LINE channel access token.
-- `OPENAI_API_KEY`: Your OpenAI API key.
-
-You can set these variables in a `.env` file or export them directly into your environment.
-
-## Deploy this on Web Platform
-
-You can choose [Heroku](https://www.heroku.com/) or [Render](http://render.com/)
-
-### Deploy this on Heroku
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
-
-### Deploy this on Render.com
-
-[![Deploy to Render](http://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy)
+1. Clone the repository to your local machine.
+2. Set the following environment variables:
+   - `ChannelSecret`: Your LINE channel secret.
+   - `ChannelAccessToken`: Your LINE channel access token.
+   - `GEMINI_API_KEY`: Your Gemini API key for AI processing.
+   - `FIREBASE_URL`: Your Firebase database URL.
+3. Install the required dependencies by running `pip install -r requirements.txt`.
+4. Start the FastAPI server with `uvicorn main:app --reload`.
 
 ## Usage
 
-To start the chatbot, run the FastAPI server:
+To use the Receipt Helper, send a picture of your receipt to the LINE bot. The bot will process the image, extract the data, and provide a JSON representation of the receipt. For text-based commands or queries, simply send the command or query as a message to the bot.
 
-```bash
-uvicorn main:app --host 0.0.0.0 --port 8000
-```
+## Commands
 
-The server will start and listen for incoming webhook events from LINE.
+- `!清空`: Clears all the scanned receipt history for the user.
 
-## Webhook Endpoint
+## Contributing
 
-The webhook endpoint `/callback` is used by LINE to send events to the chatbot. The chatbot processes these events, retrieves information from GitHub Issues, and sends responses back to the user on LINE.
+If you'd like to contribute to this project, please feel free to submit a pull request.
 
 ## License
 
-This project is licensed under the Apache License, Version 2.0. See the [LICENSE](https://www.apache.org/licenses/LICENSE-2.0) for more information.
-
-## Disclaimer
-
-This project is not officially associated with LINE Corporation or GitHub, Inc.
-
-## Contributions
-
-Contributions are welcome! Please feel free to submit a pull request or open an issue if you have any improvements or find any bugs.
-
-## Contact
-
-For any queries or support, please open an issue in this repository.
-
----
-
-Please note that this README is a template and should be customized to fit the specifics of your project and environment.
-
-```
-
-This README provides a basic template for setting up and running the GitHub Issues Chatbot for LINE. It includes sections for features, requirements, installation, configuration, usage, the webhook endpoint, license, disclaimer, contributions, and contact information. Adjust the content as necessary to match the actual functionality and setup of your project.
+This project is licensed under the MIT License - see the LICENSE file for details.
