@@ -161,7 +161,7 @@ async def handle_callback(request: Request):
                 await line_bot_api.reply_message(
                     event.reply_token,
                     [TextSendMessage(
-                        text="This receipt already exists in the database."), reply_msg]
+                        text="這個收據已經存在資料庫中。"), reply_msg, tw_items]
                 )
                 return 'OK'
 
