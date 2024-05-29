@@ -80,7 +80,7 @@ fdb = firebase.FirebaseApplication(firebase_url, None)
 genai.configure(api_key=gemini_key)
 
 
-@app.post("/callback")
+@app.post("/")
 async def handle_callback(request: Request):
     signature = request.headers['X-Line-Signature']
 
