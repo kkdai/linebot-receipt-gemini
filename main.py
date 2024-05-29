@@ -118,7 +118,7 @@ async def handle_callback(request: Request):
                 fdb.delete(user_all_receipts_path, None)
             else:
                 # fmt: off
-                prompt_msg = f'Here is my entire shopping list {all_receipts}; please answer my question based on this information. {msg}. Reply in zh_tw.'
+                prompt_msg = f'Here is my entire receipt list during my travel: {all_receipts}; please answer my question based on this information. {msg}. Reply in zh_tw.'
                 # fmt: on
                 messages = []
                 messages.append(
@@ -151,6 +151,19 @@ async def handle_callback(request: Request):
                 parse_receipt_json(result.text))
             tw_items, tw_receipt = extract_receipt_data(
                 parse_receipt_json(tw_result.text))
+
+            # Check if receipt exists, skip if it does
+            if check_if_receipt_exists(receipt.get('ReceiptID')):
+                reply_msg = get_receipt_flex_msg(receipt, items)
+                chinese_reply_msg = get_receipt_flex_msg(
+                    tw_receipt, tw_items)
+
+                await line_bot_api.reply_message(
+                    event.reply_token,
+                    [TextSendMessage(
+                        text="This receipt already exists in the database."), reply_msg]
+                )
+                return 'OK'
 
             # Call the add_receipt function with the extracted information
             add_receipt(receipt_data=tw_receipt,
@@ -257,10 +270,26 @@ def extract_receipt_data(receipt_json_obj):
 
     return items, receipt_obj
 
-# Get receipt flex message data from the receipt data and items
+
+def check_if_receipt_exists(receipt_id):
+    """
+    Check if a receipt with the given receipt ID exists in the database.
+
+    :param receipt_id: The ID of the receipt to check.
+    :return: True if the receipt exists, False otherwise.
+    """
+    try:
+        receipt = fdb.get(user_receipt_path, receipt_id)
+        return receipt is not None
+    except Exception as e:
+        print(f"Error in check_if_receipt_exists: {e}")
+        return False
 
 
 def get_receipt_flex_msg(receipt_data, items):
+    ''''
+    Generate a Flex Message for the receipt data and items.
+    '''
     # Using Templat
     items_contents = []
     for item in items:
