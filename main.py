@@ -41,11 +41,11 @@ Data format as follow:
 Otherwise, if any information is unclear, fill in with 'N/A'. 
 '''
 
-json_translate_from_korean_chinese_prompt = '''
+json_translate_from_nonchinese_prompt = '''
 This is a JSON representation of a receipt.
-Please translate the Korean characters into Chinese for me.
+Please translate the non-Chinese characters into Chinese for me.
 Using format as follow:
-    Korean(Chinese)
+    non-Chinese(Chinese)
 All the Chinese will use in zh_tw.
 Please response with the translated JSON.
 '''
@@ -143,7 +143,7 @@ async def handle_callback(request: Request):
                 img, imgage_prompt)
             print(f"Before Translate Result: {result.text}")
             tw_result = generate_gemini_text_complete(
-                result.text + "\n --- " + json_translate_from_korean_chinese_prompt)
+                result.text + "\n --- " + json_translate_from_nonchinese_prompt)
             print(f"After Translate Result: {tw_result.text}")
 
             # Check if receipt_data is not None
