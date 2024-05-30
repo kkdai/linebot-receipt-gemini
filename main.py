@@ -161,7 +161,7 @@ async def handle_callback(request: Request):
                 await line_bot_api.reply_message(
                     event.reply_token,
                     [TextSendMessage(
-                        text="這個收據已經存在資料庫中。"), reply_msg, tw_items]
+                        text="這個收據已經存在資料庫中。"), reply_msg, chinese_reply_msg]
                 )
                 return 'OK'
 
