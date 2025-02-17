@@ -18,7 +18,8 @@ import json
 
 import aiohttp
 import PIL.Image
-from firebase import firebase
+import firebase_admin
+from firebase_admin import credentials, db
 
 
 # get channel_secret and channel_access_token from your environment variable
@@ -74,7 +75,11 @@ parser = WebhookParser(channel_secret)
 user_receipt_path = f''
 user_item_path = f''
 user_all_receipts_path = f''
-fdb = firebase.FirebaseApplication(firebase_url, None)
+
+# Initialize Firebase Admin
+cred = credentials.ApplicationDefault()
+if not firebase_admin._apps:
+    firebase_admin.initialize_app(cred, {"databaseURL": firebase_url})
 
 # Initialize the Gemini Pro API
 genai.configure(api_key=gemini_key)
@@ -107,7 +112,7 @@ async def handle_callback(request: Request):
         user_all_receipts_path = f'receipt_helper/{user_id}'
 
         if (event.message.type == "text"):
-            all_receipts = fdb.get(user_all_receipts_path, None)
+            all_receipts = db.reference(user_all_receipts_path).get()
 
             # Provide a default value for reply_msg
             reply_msg = TextSendMessage(text='No message to reply with')
@@ -115,7 +120,7 @@ async def handle_callback(request: Request):
             msg = event.message.text
             if msg == '!清空':
                 reply_msg = TextSendMessage(text='對話歷史紀錄已經清空！')
-                fdb.delete(user_all_receipts_path, None)
+                db.reference(user_all_receipts_path).delete()
             else:
                 # fmt: off
                 prompt_msg = f'Here is my entire receipt list during my travel: {all_receipts}; please answer my question based on this information. {msg}. Reply in zh_tw.'
@@ -217,12 +222,12 @@ def add_receipt(receipt_data, items):
     try:
         # Add the receipt to the 'Receipts' collection
         receipt_id = receipt_data.get('ReceiptID')
-        fdb.put(user_receipt_path, receipt_id, receipt_data)
+        db.reference(user_receipt_path).child(receipt_id).set(receipt_data)
 
         # Add each item to the 'Items' collection
         for item in items:
             item_id = item.get('ItemID')
-            fdb.put(user_item_path, item_id, item)
+            db.reference(user_item_path).child(item_id).set(item)
 
         print(f"Add ReceiptID: {receipt_id} completed.")
     except Exception as e:
@@ -279,7 +284,7 @@ def check_if_receipt_exists(receipt_id):
     :return: True if the receipt exists, False otherwise.
     """
     try:
-        receipt = fdb.get(user_receipt_path, receipt_id)
+        receipt = db.reference(user_receipt_path).child(receipt_id).get()
         return receipt is not None
     except Exception as e:
         print(f"Error in check_if_receipt_exists: {e}")
