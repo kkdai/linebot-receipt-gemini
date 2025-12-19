@@ -92,7 +92,7 @@ def generate_gemini_text_complete(prompt: str):
     :param prompt: 輸入提示文字
     :return: Gemini 回應物件
     """
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    model = genai.GenerativeModel('gemini-2.5-flash')
     response = model.generate_content(prompt)
     return response
 
@@ -104,7 +104,7 @@ def generate_json_from_receipt_image(img, prompt: str):
     :param prompt: 輸入提示文字
     :return: Gemini 回應物件
     """
-    model = genai.GenerativeModel('gemini-2.0-flash')
+    model = genai.GenerativeModel('gemini-2.5-flash')
     response = model.generate_content([prompt, img], stream=True)
     response.resolve()
     return response
